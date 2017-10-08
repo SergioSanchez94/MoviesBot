@@ -16,6 +16,7 @@ public class Config {
 	static String PORT;
 	static String USER;
 	static String PASSWORD;
+	static String BOTNAME;
 
 	public static void initConfig() {
 		try {
@@ -58,7 +59,10 @@ public class Config {
 				case "password":
 					PASSWORD = value;
 					break;
-
+					
+				case "botName":
+					BOTNAME = value;
+					break;
 				default:
 					break;
 				}
@@ -167,5 +171,14 @@ public class Config {
 	public static void setPASSWORD(String pASSWORD) {
 		PASSWORD = pASSWORD;
 	}
+
+	public static String getBOTNAME() {
+		return BOTNAME;
+	}
+
+	public static void setBOTNAME(String bOTNAME) {
+		BOTNAME = bOTNAME;
+	}
+	
 
 }

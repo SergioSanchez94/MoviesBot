@@ -1,15 +1,11 @@
 package com.sergiosanchez.bot;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.telegram.telegrambots.api.methods.send.SendDocument;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
@@ -19,9 +15,9 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButto
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-
 import com.sergiosanchez.configuration.Config;
 import com.sergiosanchez.movies.AnalyzerService;
+import com.sergiosanchez.movies.IPConnection;
 import com.sergiosanchez.movies.Movie;
 import com.vdurmont.emoji.EmojiParser;
 
@@ -32,10 +28,10 @@ public class MoviesBot extends TelegramLongPollingBot {
 	Movie movieSeleccionada;
 	ArrayList<String> listaOpciones = new ArrayList<String>();
 	String busqueda;
-	
+
 	@Override
 	public String getBotUsername() {
-		return "MoviesSerflixBot";
+		return Config.getBOTNAME();
 	}
 
 	@Override
@@ -48,7 +44,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 			keyboardremove.setSelective(true);
 			message.setReplyMarkup(keyboardremove);
 			message.setChatId(update.getMessage().getChatId());
-			
+
 			if (update.getMessage().getText().equals("Hola")) {
 				String mensaje = "Hola! Te recomiendo estas últimas películas:\n";
 
@@ -57,23 +53,25 @@ public class MoviesBot extends TelegramLongPollingBot {
 				}
 
 				message.setText(mensaje);
-			
-			/**
-			 * Busca la pelicula y muestra la lista de resultados
-			 */
-			} else if (update.getMessage().getText().contains("Busca ") || update.getMessage().getText().equals("Enseñame la lista otra vez")) {
+
+				/**
+				 * Busca la pelicula y muestra la lista de resultados
+				 */
+			} else if (update.getMessage().getText().contains("Busca ")
+					|| update.getMessage().getText().equals("Enseñame la lista otra vez")) {
 
 				movies = new ArrayList<Movie>();
 				movieSeleccionada = null;
 				listaOpciones = new ArrayList<String>();
-				
+
 				String search;
-				
-				//No es necesario buscar en el String otra vez porque ya tenemos la busqueda almacenada
-				if(update.getMessage().getText().equals("Enseñame la lista otra vez")){
+
+				// No es necesario buscar en el String otra vez porque ya tenemos la busqueda
+				// almacenada
+				if (update.getMessage().getText().equals("Enseñame la lista otra vez")) {
 					search = busqueda;
-				//Buscamos en el mensaje la película
-				}else{
+					// Buscamos en el mensaje la película
+				} else {
 					search = update.getMessage().getText().substring(6, update.getMessage().getText().length());
 					busqueda = search;
 				}
@@ -100,7 +98,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 						for (KeyboardRow keyboardRow : rows) {
 							list.add(keyboardRow);
 						}
-						
+
 						KeyboardRow row = new KeyboardRow();
 						KeyboardButton button = new KeyboardButton();
 						button.setText("Cancelar");
@@ -122,15 +120,14 @@ public class MoviesBot extends TelegramLongPollingBot {
 				}
 
 				/**
-				 * Obtiene la información de esa película y pregunta si quiere
-				 * descargarla
+				 * Obtiene la información de esa película y pregunta si quiere descargarla
 				 */
 			} else if (update.getMessage().getText().equals("Si, añádela")) {
 
 				try {
 					AnalyzerService.getMovie(Config.getIPADDRESS(), movieSeleccionada.getUrl(), Config.getDOMAIN());
-					message.setText(EmojiParser.parseToUnicode(
-							"La película " + movieSeleccionada.getName() + " se ha enviado a tu biblioteca :file_folder:"));
+					message.setText(EmojiParser.parseToUnicode("La película " + movieSeleccionada.getName()
+							+ " se ha enviado a tu biblioteca :file_folder:"));
 
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
@@ -150,6 +147,63 @@ public class MoviesBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().equals("Cancelar")) {
 
 				message.setText("Vale!");
+				movies = null;
+				movieSeleccionada = null;
+				listaOpciones = null;
+				busqueda = null;
+
+			} else if (update.getMessage().getText().equals("Dime el estado")) {
+
+				String estado = null;
+				int init = 0;
+				String mensaje = "";
+				String estadoTorrent = "";
+
+				JSONObject jObject;
+				try {
+					jObject = new JSONObject(IPConnection.getInfo(Config.getIPADDRESS()));
+					JSONArray torrents = jObject.getJSONArray("torrents");
+					mensaje = "Aquí tienes el estado de tu biblioteca:\n\n";
+					for (int i = 0; i < torrents.length(); i++) {
+						JSONArray resultado = torrents.getJSONArray(i);
+
+						String jsonString = resultado.toString();
+						String responseArray[] = jsonString.split(",");
+
+						String nombre = responseArray[2].replace("\"", "");
+						nombre = nombre.substring(0, nombre.indexOf("[") - 1);
+						estado = responseArray[21];
+
+						if (estado.contains("Paused")) {
+							init = estado.indexOf("Paused") + 6;
+							estadoTorrent = "pausada";
+						} else if (estado.contains("Seeding")) {
+							init = estado.indexOf("Seeding") + 7;
+							estadoTorrent = "completada";
+						} else if (estado.contains("Downloading")) {
+							init = estado.indexOf("Downloading") + 11;
+							estadoTorrent = "en proceso";
+						} else if (estado.contains("Stopped")) {
+							init = estado.indexOf("Stopped") + 7;
+							estadoTorrent = "parada";
+						}
+
+						String porcentaje = estado.substring(init, estado.length());
+						porcentaje = porcentaje.replace(",", "");
+						porcentaje = porcentaje.replace("\"", "");
+
+						mensaje = mensaje + " - " + nombre + " está " + estadoTorrent + " con un " + porcentaje.trim()
+								+ "\n\n";
+
+					}
+
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					mensaje = "No hay novedades";
+				}
+
+				message.setText(mensaje);
+
 				movies = null;
 				movieSeleccionada = null;
 				listaOpciones = null;
@@ -179,13 +233,14 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 								String trailer = AnalyzerService.getTrailer(busqueda, movieSeleccionada.getDate());
 
-								String mensaje = EmojiParser
-										.parseToUnicode("Esta es la información de la película que has seleccionado:\n\n"
-												+ ":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n" + " - Fecha: "
-												+ movieSeleccionada.getDate() + " :date:\n" + " - Calidad: "
-												+ movieSeleccionada.getQuality() + " :thumbsup:\n" + " - Tamaño: "
-												+ movieSeleccionada.getSize() + " :dvd:\n" + " - Trailer: " + trailer
-												+ "\n\n" + "¿Quieres añadirla a tu biblioteca? (Aquí te dejo un trailer por si no te decides :wink:)\n\n");
+								String mensaje = EmojiParser.parseToUnicode(
+										"Esta es la información de la película que has seleccionado:\n\n"
+												+ ":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
+												+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
+												+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
+												+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n"
+												+ " - Trailer: " + trailer + "\n\n"
+												+ "¿Quieres añadirla a tu biblioteca? (Aquí te dejo un trailer por si no te decides :wink:)\n\n");
 
 								message.setText(mensaje);
 
@@ -234,8 +289,8 @@ public class MoviesBot extends TelegramLongPollingBot {
 						}
 					}
 
-				}else{
-					
+				} else {
+
 				}
 
 			}
