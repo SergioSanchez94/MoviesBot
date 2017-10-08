@@ -46,7 +46,7 @@ public class PrintThread extends Thread {
 							nombre = nombre.substring(0, nombre.indexOf("["));
 							nombre = nombre.replace(" ", "%20");
 
-							mensaje = EmojiParser.parseToUnicode(":white_check_mark:") + "%20" + nombre + "ya%20se%20ha%20completado%20"
+							mensaje = nombre + "%20ya%20se%20ha%20completado%20"
 									+ EmojiParser.parseToUnicode(":tada:")
 									+ EmojiParser.parseToUnicode(":tada:")
 									+ EmojiParser.parseToUnicode(":tada:")

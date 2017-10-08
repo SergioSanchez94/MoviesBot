@@ -164,38 +164,44 @@ public class MoviesBot extends TelegramLongPollingBot {
 					jObject = new JSONObject(IPConnection.getInfo(Config.getIPADDRESS()));
 					JSONArray torrents = jObject.getJSONArray("torrents");
 					mensaje = "Aquí tienes el estado de tu biblioteca:\n\n";
-					for (int i = 0; i < torrents.length(); i++) {
-						JSONArray resultado = torrents.getJSONArray(i);
+					
+					if(torrents.length()!=0) {
+						for (int i = 0; i < torrents.length(); i++) {
+							JSONArray resultado = torrents.getJSONArray(i);
 
-						String jsonString = resultado.toString();
-						String responseArray[] = jsonString.split(",");
+							String jsonString = resultado.toString();
+							String responseArray[] = jsonString.split(",");
 
-						String nombre = responseArray[2].replace("\"", "");
-						nombre = nombre.substring(0, nombre.indexOf("[") - 1);
-						estado = responseArray[21];
+							String nombre = responseArray[2].replace("\"", "");
+							nombre = nombre.substring(0, nombre.indexOf("[") - 1);
+							estado = responseArray[21];
 
-						if (estado.contains("Paused")) {
-							init = estado.indexOf("Paused") + 6;
-							estadoTorrent = "pausada";
-						} else if (estado.contains("Seeding")) {
-							init = estado.indexOf("Seeding") + 7;
-							estadoTorrent = "completada";
-						} else if (estado.contains("Downloading")) {
-							init = estado.indexOf("Downloading") + 11;
-							estadoTorrent = "en proceso";
-						} else if (estado.contains("Stopped")) {
-							init = estado.indexOf("Stopped") + 7;
-							estadoTorrent = "parada";
+							if (estado.contains("Paused")) {
+								init = estado.indexOf("Paused") + 6;
+								estadoTorrent = "pausada";
+							} else if (estado.contains("Seeding")) {
+								init = estado.indexOf("Seeding") + 7;
+								estadoTorrent = "completada";
+							} else if (estado.contains("Downloading")) {
+								init = estado.indexOf("Downloading") + 11;
+								estadoTorrent = "en proceso";
+							} else if (estado.contains("Stopped")) {
+								init = estado.indexOf("Stopped") + 7;
+								estadoTorrent = "parada";
+							}
+
+							String porcentaje = estado.substring(init, estado.length());
+							porcentaje = porcentaje.replace(",", "");
+							porcentaje = porcentaje.replace("\"", "");
+
+							mensaje = mensaje + " - " + nombre + " está " + estadoTorrent + " con un " + porcentaje.trim()
+									+ "\n\n";
+
 						}
-
-						String porcentaje = estado.substring(init, estado.length());
-						porcentaje = porcentaje.replace(",", "");
-						porcentaje = porcentaje.replace("\"", "");
-
-						mensaje = mensaje + " - " + nombre + " está " + estadoTorrent + " con un " + porcentaje.trim()
-								+ "\n\n";
-
+					}else {
+						mensaje = "No hay novedades";
 					}
+					
 
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
