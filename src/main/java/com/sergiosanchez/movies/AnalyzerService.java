@@ -8,7 +8,10 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -255,11 +258,13 @@ public class AnalyzerService {
 
 	public static ArrayList<Movie> getLasReleaseMovies() {
 		
+		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+		
 		ArrayList<Movie> movies = new ArrayList<Movie>();
 
 		try {
 			URL url = new URL(
-					"https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year=2017");
+					"https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+currentYear);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
@@ -285,14 +290,14 @@ public class AnalyzerService {
 
 			while ((output = br.readLine()) != null) {
 				JSONObject jObject;
-				Movie movie = new Movie(null, null, null, null, null, null, null);
+				Movie movie;
 				try {
 					jObject = new JSONObject(output);
 					JSONArray results = jObject.getJSONArray("results");
 					
 					for (int i = 0; i < results.length(); i++) {
+						movie = new Movie(null, null, null, null, null, null, null);
 						JSONObject resultado = results.getJSONObject(i);
-						System.out.println(resultado);
 						movie.setName(resultado.getString("title"));
 						movies.add(movie);
 					}

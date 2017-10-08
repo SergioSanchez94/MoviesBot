@@ -45,14 +45,14 @@ public class MoviesBot extends TelegramLongPollingBot {
 			message.setReplyMarkup(keyboardremove);
 			message.setChatId(update.getMessage().getChatId());
 
-			if (update.getMessage().getText().equals("Hola")) {
-				String mensaje = "Hola! Te recomiendo estas últimas películas:\n";
+			if (update.getMessage().getText().startsWith("Recomiendame")) {
+				String mensaje = ":first_place_medal: Te recomiendo estas últimas películas :movie_camera::\n\n";
 
 				for (Movie movie : AnalyzerService.getLasReleaseMovies()) {
-					mensaje = mensaje + movie.getName() + "\n";
+					mensaje = mensaje + " - " + movie.getName() + "\n";
 				}
 
-				message.setText(mensaje);
+				message.setText(EmojiParser.parseToUnicode(mensaje));
 
 				/**
 				 * Busca la pelicula y muestra la lista de resultados
