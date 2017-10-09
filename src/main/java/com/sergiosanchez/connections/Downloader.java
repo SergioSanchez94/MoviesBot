@@ -252,12 +252,7 @@ public class Downloader {
 						URL = URL + strTemp.charAt(i);
 					}
 
-					salida = "se ha añadido a tu biblioteca";
-
-					try {
-						Library.addFile(IP, "http://" + DOMINIO + "" + URL);
-					} catch (Exception e) {
-					}
+					salida = URL;
 
 				}
 			}
