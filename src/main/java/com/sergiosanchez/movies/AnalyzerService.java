@@ -8,18 +8,14 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
-
 import com.sergiosanchez.configuration.Config;
 
 public class AnalyzerService {
@@ -243,7 +239,7 @@ public class AnalyzerService {
 					salida = "se ha añadido a tu biblioteca";
 
 					try {
-						IPConnection.load(IP, "http://" + DOMINIO + "" + URL);
+						IPConnection.addFile(IP, "http://" + DOMINIO + "" + URL);
 					} catch (Exception e) {
 					}
 

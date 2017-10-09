@@ -1,9 +1,9 @@
 package com.sergiosanchez.movies;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URLEncoder;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -19,19 +19,21 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.sergiosanchez.configuration.Config;
 
+@SuppressWarnings("deprecation")
 public class IPConnection {
-	
-	
 
-    public static void load(String IP,String source) throws Exception {
+    private static DefaultHttpClient httpclient;
+	private static DefaultHttpClient httpclient2;
+	private static DefaultHttpClient httpclient3;
+
+	public static void addFile(String IP,String source) throws Exception {
 
         HttpHost targetHost = new HttpHost(IP, Integer.parseInt(Config.getPORT()) , "http");
 
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+        httpclient = new DefaultHttpClient();
         try {
             httpclient.getCredentialsProvider().setCredentials(
                     new AuthScope(targetHost.getHostName(), targetHost.getPort()),
@@ -89,9 +91,9 @@ public class IPConnection {
     	 
     	 	String responseMethod = "";
 
-         DefaultHttpClient httpclient = new DefaultHttpClient();
+         httpclient2 = new DefaultHttpClient();
          try {
-             httpclient.getCredentialsProvider().setCredentials(
+             httpclient2.getCredentialsProvider().setCredentials(
                      new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                      new UsernamePasswordCredentials(Config.getUSER(), Config.getPASSWORD()));
 
@@ -103,11 +105,11 @@ public class IPConnection {
              localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
 
              HttpGet httpget = new HttpGet("http://"+IP+":"+Config.getPORT()+"/gui/");
-             HttpResponse response = httpclient.execute(targetHost, httpget, localcontext);
+             HttpResponse response = httpclient2.execute(targetHost, httpget, localcontext);
              EntityUtils.consumeQuietly(response.getEntity());
              
              httpget = new HttpGet("http://"+IP+":"+Config.getPORT()+"/gui/token.html");
-             response = httpclient.execute(targetHost, httpget, localcontext);
+             response = httpclient2.execute(targetHost, httpget, localcontext);
              
              HttpEntity e = response.getEntity();
              InputStream is = e.getContent();
@@ -125,7 +127,7 @@ public class IPConnection {
              EntityUtils.consumeQuietly(response.getEntity());
              
              httpget = new HttpGet("http://"+IP+":"+8080+"/gui/?list=1&token="+token);
-	         response = httpclient.execute(targetHost, httpget, localcontext);
+	         response = httpclient2.execute(targetHost, httpget, localcontext);
              
              e = response.getEntity();
              is = e.getContent();
@@ -138,25 +140,23 @@ public class IPConnection {
              System.out.println(sw.toString());
 
          } catch (ClientProtocolException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} finally {
-             httpclient.getConnectionManager().shutdown();
+             httpclient2.getConnectionManager().shutdown();
          }
 		return responseMethod;
     }
     
-    public static String removeDownload(String IP, String hash) {
+    public static String removeFile(String IP, String hash) {
    	 HttpHost targetHost = new HttpHost(IP, Integer.parseInt(Config.getPORT()) , "http");
    	 
    	 	String responseMethod = "";
 
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+        httpclient3 = new DefaultHttpClient();
         try {
-            httpclient.getCredentialsProvider().setCredentials(
+            httpclient3.getCredentialsProvider().setCredentials(
                     new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                     new UsernamePasswordCredentials(Config.getUSER(), Config.getPASSWORD()));
 
@@ -168,11 +168,11 @@ public class IPConnection {
             localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
 
             HttpGet httpget = new HttpGet("http://"+IP+":"+Config.getPORT()+"/gui/");
-            HttpResponse response = httpclient.execute(targetHost, httpget, localcontext);
+            HttpResponse response = httpclient3.execute(targetHost, httpget, localcontext);
             EntityUtils.consumeQuietly(response.getEntity());
             
             httpget = new HttpGet("http://"+IP+":"+Config.getPORT()+"/gui/token.html");
-            response = httpclient.execute(targetHost, httpget, localcontext);
+            response = httpclient3.execute(targetHost, httpget, localcontext);
             
             HttpEntity e = response.getEntity();
             InputStream is = e.getContent();
@@ -190,7 +190,7 @@ public class IPConnection {
             EntityUtils.consumeQuietly(response.getEntity());
             
             httpget = new HttpGet("http://"+IP+":"+8080+"/gui/?action=remove&hash="+hash+"&token="+token);
-	         response = httpclient.execute(targetHost, httpget, localcontext);
+	         response = httpclient3.execute(targetHost, httpget, localcontext);
             
             e = response.getEntity();
             is = e.getContent();
@@ -203,13 +203,11 @@ public class IPConnection {
             System.out.println(sw.toString());
 
         } catch (ClientProtocolException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} finally {
-            httpclient.getConnectionManager().shutdown();
+            httpclient3.getConnectionManager().shutdown();
         }
 		return responseMethod;
    }

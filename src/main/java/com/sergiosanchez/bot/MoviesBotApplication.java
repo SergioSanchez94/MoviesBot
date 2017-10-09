@@ -1,11 +1,10 @@
 package com.sergiosanchez.bot;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
+
 import com.sergiosanchez.configuration.Config;
 
 @SpringBootApplication
@@ -14,7 +13,7 @@ public class MoviesBotApplication {
 	public static void main(String[] args) {
 		Config.initConfig();
 
-		PrintThread printThread1 = new PrintThread();
+		NotificationsThread printThread1 = new NotificationsThread();
 		printThread1.setName("Thread 1");
 
 		printThread1.start();

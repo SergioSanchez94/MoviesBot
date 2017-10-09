@@ -26,7 +26,7 @@ public class Config {
 			properties.load(fileInput);
 			fileInput.close();
 
-			Enumeration enuKeys = properties.keys();
+			Enumeration<Object> enuKeys = properties.keys();
 			while (enuKeys.hasMoreElements()) {
 				String key = (String) enuKeys.nextElement();
 				String value = properties.getProperty(key);
