@@ -252,15 +252,12 @@ public class AnalyzerService {
 		return salida;
 	}
 
-	public static ArrayList<Movie> getLasReleaseMovies() {
-		
-		int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+	public static ArrayList<Movie> getMovies(String direccionAPI) {
 		
 		ArrayList<Movie> movies = new ArrayList<Movie>();
 
 		try {
-			URL url = new URL(
-					"https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+currentYear);
+			URL url = new URL(direccionAPI);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 
@@ -295,6 +292,7 @@ public class AnalyzerService {
 						movie = new Movie(null, null, null, null, null, null, null);
 						JSONObject resultado = results.getJSONObject(i);
 						movie.setName(resultado.getString("title"));
+						movie.setDescription(resultado.getString("overview"));
 						movies.add(movie);
 					}
 					

@@ -98,6 +98,7 @@ public class NotificationsThread extends Thread {
 
 		int dia = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
 		int hora = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		int year = Calendar.getInstance().get(Calendar.YEAR);
 
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		Date date = new Date();
@@ -119,7 +120,7 @@ public class NotificationsThread extends Thread {
 				fechasRecomendaciones.add(diaActual);
 
 				// Recomendaciones semanales
-				for (Movie movie : AnalyzerService.getLasReleaseMovies()) {
+				for (Movie movie : AnalyzerService.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+year)) {
 					recomendaciones = recomendaciones + "%20-%20" + movie.getName() + "%0A";
 				}
 				recomendaciones = recomendaciones.replace(" ", "%20");

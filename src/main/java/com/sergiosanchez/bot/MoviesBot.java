@@ -2,6 +2,7 @@ package com.sergiosanchez.bot;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,8 +48,10 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 			if (update.getMessage().getText().startsWith("Recomiendame")) {
 				String mensaje = ":first_place_medal: Te recomiendo estas últimas películas :movie_camera::\n\n";
-
-				for (Movie movie : AnalyzerService.getLasReleaseMovies()) {
+				
+				int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+				
+				for (Movie movie : AnalyzerService.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+currentYear)) {
 					mensaje = mensaje + " - " + movie.getName() + "\n";
 				}
 
@@ -143,6 +146,39 @@ public class MoviesBot extends TelegramLongPollingBot {
 				movieSeleccionada = null;
 				listaOpciones = null;
 				busqueda = null;
+			
+			} else if (update.getMessage().getText().equals("Ver Sinopsis")) {
+
+				ArrayList <Movie> movieSearch = new ArrayList<Movie>();
+				movieSearch = AnalyzerService.getMovies("https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="+busqueda+"&Spain&year="+movieSeleccionada.getDate()+"&page=1'");
+				message.setText(" - Sinopsis: " + movieSearch.get(0).getDescription());
+				
+				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+
+				KeyboardRow row1 = new KeyboardRow();
+				KeyboardRow row2 = new KeyboardRow();
+				KeyboardRow row3 = new KeyboardRow();
+
+				KeyboardButton button1 = new KeyboardButton();
+				KeyboardButton button2 = new KeyboardButton();
+				KeyboardButton button3 = new KeyboardButton();
+
+				button1.setText("Si, añádela");
+				button2.setText("No, esa no");
+				button3.setText("Enseñame la lista otra vez");
+
+				row1.add(button1);
+				row2.add(button2);
+				row3.add(button3);
+
+				List<KeyboardRow> list = new ArrayList<KeyboardRow>();
+
+				list.add(row1);
+				list.add(row2);
+				list.add(row3);
+
+				keyboard.setKeyboard(list);
+				message.setReplyMarkup(keyboard);
 
 			} else if (update.getMessage().getText().equals("Cancelar")) {
 
@@ -204,7 +240,6 @@ public class MoviesBot extends TelegramLongPollingBot {
 					
 
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					mensaje = "No hay novedades";
 				}
 
@@ -238,7 +273,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 								movieSeleccionada.setUrl(movies.get(numero).getUrl());
 
 								String trailer = AnalyzerService.getTrailer(busqueda, movieSeleccionada.getDate());
-
+								
 								String mensaje = EmojiParser.parseToUnicode(
 										"Esta es la información de la película que has seleccionado:\n\n"
 												+ ":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
@@ -256,7 +291,6 @@ public class MoviesBot extends TelegramLongPollingBot {
 									sendPhoto.setPhoto(movieSeleccionada.getImg());
 									sendPhoto(sendPhoto);
 								} catch (TelegramApiException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 
@@ -265,24 +299,29 @@ public class MoviesBot extends TelegramLongPollingBot {
 								KeyboardRow row1 = new KeyboardRow();
 								KeyboardRow row2 = new KeyboardRow();
 								KeyboardRow row3 = new KeyboardRow();
+								KeyboardRow row4 = new KeyboardRow();
 
 								KeyboardButton button1 = new KeyboardButton();
 								KeyboardButton button2 = new KeyboardButton();
 								KeyboardButton button3 = new KeyboardButton();
+								KeyboardButton button4 = new KeyboardButton();
 
 								button1.setText("Si, añádela");
 								button2.setText("No, esa no");
-								button3.setText("Enseñame la lista otra vez");
+								button3.setText("Ver Sinopsis");
+								button4.setText("Enseñame la lista otra vez");
 
 								row1.add(button1);
 								row2.add(button2);
 								row3.add(button3);
+								row4.add(button4);
 
 								List<KeyboardRow> list = new ArrayList<KeyboardRow>();
 
 								list.add(row1);
 								list.add(row2);
 								list.add(row3);
+								list.add(row4);
 
 								keyboard.setKeyboard(list);
 								message.setReplyMarkup(keyboard);

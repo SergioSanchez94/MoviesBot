@@ -13,17 +13,16 @@ public class MoviesBotApplication {
 	public static void main(String[] args) {
 		Config.initConfig();
 
-		NotificationsThread printThread1 = new NotificationsThread();
-		printThread1.setName("Thread 1");
+		NotificationsThread notificationsThread = new NotificationsThread();
+		notificationsThread.setName("NotificationsThread");
 
-		printThread1.start();
+		notificationsThread.start();
 
 		ApiContextInitializer.init();
 		TelegramBotsApi botsApi = new TelegramBotsApi();
 		try {
 			botsApi.registerBot(new MoviesBot());
 		} catch (TelegramApiRequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
