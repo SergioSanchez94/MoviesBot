@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,14 +13,15 @@ import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+
 import com.sergiosanchez.configuration.Config;
-import com.sergiosanchez.connections.MoviesAPI;
 import com.sergiosanchez.connections.Downloader;
 import com.sergiosanchez.connections.Library;
+import com.sergiosanchez.connections.MoviesAPI;
+import com.sergiosanchez.movies.Cast;
 import com.sergiosanchez.movies.Movie;
 import com.sergiosanchez.utils.Util;
 import com.vdurmont.emoji.EmojiParser;
@@ -83,8 +85,6 @@ public class MoviesBot extends TelegramLongPollingBot {
 				movieSeleccionada = null;
 				listaOpciones = new ArrayList<String>();
 				ArrayList<String> keyboardButtons = new ArrayList<String>();
-
-				String search;
 
 				if (update.getMessage().getText().equals("Enseñame la lista otra vez")) {
 					// No es necesario buscar en el String otra vez porque ya
@@ -157,27 +157,43 @@ public class MoviesBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().equals("Ver Sinopsis")) {
 
 				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-				ArrayList<Movie> movieSearch = new ArrayList<Movie>();
-
-				// Pasa la busqueda a formato URL
-				String busquedaURL = busqueda.replace(" ", "%20");
-
-				// Hace la busqueda
-				movieSearch = MoviesAPI.getMovies(
-						"https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="
-								+ busquedaURL + "&Spain&year=" + movieSeleccionada.getDate() + "&page=1'");
 
 				// Coge la descripcion del primer resultado de la búsqueda
-				message.setText(" - Sinopsis: " + movieSearch.get(0).getDescription());
+				message.setText(" - Sinopsis: " + movieSeleccionada.getDescription());
 
 				// Genera un teclado de opciones
 				ArrayList<String> optionsKeyboard = new ArrayList<String>();
 				optionsKeyboard.add("Si, añádela");
 				optionsKeyboard.add("No, esa no");
+				optionsKeyboard.add("Ver Sinopsis");
+				optionsKeyboard.add("Ver Casting");
 				optionsKeyboard.add("Enseñame la lista otra vez");
 				keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
 				message.setReplyMarkup(keyboard);
 
+			} else if (update.getMessage().getText().equals("Ver Casting")) {
+
+				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+				String mensaje = "Aqui tienes el casting de " + movieSeleccionada.getName() + ":\n\n";
+				
+				ArrayList<Cast> castList = MoviesAPI.getCastList(movieSeleccionada.getId());
+				for (Cast cast : castList) {
+					mensaje = mensaje + " - " + cast.getActor() + " como " + cast.getCharacter() + "\n";
+				}
+
+				// Coge la descripcion del primer resultado de la búsqueda
+				message.setText(mensaje);
+
+				// Genera un teclado de opciones
+				ArrayList<String> optionsKeyboard = new ArrayList<String>();
+				optionsKeyboard.add("Si, añádela");
+				optionsKeyboard.add("No, esa no");
+				optionsKeyboard.add("Ver Sinopsis");
+				optionsKeyboard.add("Ver Casting");
+				optionsKeyboard.add("Enseñame la lista otra vez");
+				keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
+				message.setReplyMarkup(keyboard);	
+			
 			} else if (update.getMessage().getText().equals("Cancelar")) {
 
 				message.setText("Vale!");
@@ -278,6 +294,18 @@ public class MoviesBot extends TelegramLongPollingBot {
 												+ "¿Quieres añadirla a tu biblioteca? (Aquí te dejo un trailer por si no te decides :wink:)\n\n");
 
 								message.setText(mensaje);
+								
+								// Pasa la busqueda a formato URL
+								String busquedaURL = busqueda.replace(" ", "%20");
+
+								// Hace la busqueda
+								ArrayList<Movie> movieSearchAPI = new ArrayList<Movie>();
+								movieSearchAPI = MoviesAPI.getMovies(
+										"https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="
+												+ busquedaURL + "&Spain&year=" + movieSeleccionada.getDate() + "&page=1'");
+								
+								movieSeleccionada.setDescription(movieSearchAPI.get(0).getDescription());
+								movieSeleccionada.setId(movieSearchAPI.get(0).getId());
 
 								try {
 									SendPhoto sendPhoto = new SendPhoto();
@@ -295,6 +323,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 								optionsKeyboard.add("Si, añádela");
 								optionsKeyboard.add("No, esa no");
 								optionsKeyboard.add("Ver Sinopsis");
+								optionsKeyboard.add("Ver Casting");
 								optionsKeyboard.add("Enseñame la lista otra vez");
 								keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
 								message.setReplyMarkup(keyboard);

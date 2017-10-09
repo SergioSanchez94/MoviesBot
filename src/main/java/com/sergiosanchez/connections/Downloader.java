@@ -95,7 +95,7 @@ public class Downloader {
 						nombre = nombre.substring(0, nombre.length() - 1);
 					}
 
-					Movie movie = new Movie(nombre, null, null, calidad, url, null, null);
+					Movie movie = new Movie(0, nombre, null, null, calidad, url, null, null);
 
 					// Solo añade estas dos calidades
 					if (calidad.equals("MicroHD-1080p") || calidad.equals("DVDRip")) {
@@ -185,7 +185,7 @@ public class Downloader {
 			ex.printStackTrace();
 		}
 
-		Movie movie = new Movie(null, date, description, null, url, imagenPelicula, GB);
+		Movie movie = new Movie(0, null, date, description, null, url, imagenPelicula, GB);
 
 		return movie;
 

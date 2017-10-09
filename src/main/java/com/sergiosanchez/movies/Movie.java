@@ -7,6 +7,7 @@ package com.sergiosanchez.movies;
  */
 public class Movie {
 
+	int id;
 	String name;
 	String date;
 	String description;
@@ -20,8 +21,9 @@ public class Movie {
 	 * @param url
 	 * @param img 
 	 */
-	public Movie(String name, String date, String description, String quality, String url, String img, String size) {
+	public Movie(int id, String name, String date, String description, String quality, String url, String img, String size) {
 		super();
+		this.id = id;
 		this.name = name;
 		this.date = date;
 		this.description = description;
@@ -30,6 +32,23 @@ public class Movie {
 		this.quality = quality;
 		this.size = size;
 	}
+
+	
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
 
 	/**
 	 * @return the name

@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sergiosanchez.configuration.Config;
+import com.sergiosanchez.movies.Cast;
 import com.sergiosanchez.movies.Movie;
 
 /**
@@ -70,9 +71,10 @@ public class MoviesAPI {
 					JSONArray results = jObject.getJSONArray("results");
 					
 					for (int i = 0; i < results.length(); i++) {
-						movie = new Movie(null, null, null, null, null, null, null);
+						movie = new Movie(0, null, null, null, null, null, null, null);
 						JSONObject resultado = results.getJSONObject(i);
 						movie.setName(resultado.getString("title"));
+						movie.setId(resultado.getInt("id"));
 						movie.setDescription(resultado.getString("overview"));
 						movies.add(movie);
 					}
@@ -180,5 +182,59 @@ public class MoviesAPI {
 		}
 		return trailer;
 	}
+	
+	/**
+	 * Devuelve la lista de actores de una película por su ID
+	 * @param idPelicula
+	 * @return ArrayList<Cast>
+	 */
+	public static ArrayList<Cast> getCastList(int idPelicula){
+		
+		ArrayList<Cast> castList = new ArrayList<Cast>();
+		
+		try {
+			URL url = new URL(
+					"https://api.themoviedb.org/3/movie/"+idPelicula+"/credits?api_key="+Config.getAPIKEY()+"&language=es-ES&page=1");
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Accept", "application/json");
 
+			if (conn.getResponseCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			String output;
+			
+			while ((output = br.readLine()) != null) {
+				JSONObject jObject;
+				try {
+					jObject = new JSONObject(output);
+					JSONArray results = jObject.getJSONArray("cast");
+					
+					//Maximo 10 actores
+					for (int i = 0; i < 15; i++) {
+						Cast cast = new Cast(0, null, null, null);
+						JSONObject resultado = results.getJSONObject(i);
+						cast.setId(resultado.getInt("cast_id"));
+						cast.setCharacter(resultado.getString("character"));
+						cast.setActor(resultado.getString("name"));
+						cast.setImg("profile_path");
+						castList.add(cast);
+					}
+
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+			conn.disconnect();
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return castList;
+		
+	}
 }
