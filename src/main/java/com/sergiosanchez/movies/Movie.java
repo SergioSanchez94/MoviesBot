@@ -1,5 +1,10 @@
 package com.sergiosanchez.movies;
 
+/**
+ * Clase objeto que almacena la información de una película
+ * @author Sergio Sanchez
+ *
+ */
 public class Movie {
 
 	String name;

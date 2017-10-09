@@ -13,11 +13,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.sergiosanchez.configuration.Config;
-import com.sergiosanchez.movies.AnalyzerService;
-import com.sergiosanchez.movies.IPConnection;
+import com.sergiosanchez.connections.Library;
+import com.sergiosanchez.connections.MoviesAPI;
 import com.sergiosanchez.movies.Movie;
 import com.vdurmont.emoji.EmojiParser;
 
+/**
+ * Clase que arranca un hilo que se encarga de vigilar los métodos dentro de si mismo
+ * @author Sergio Sanchez
+ *
+ */
 @SuppressWarnings("deprecation")
 public class NotificationsThread extends Thread {
 
@@ -40,6 +45,9 @@ public class NotificationsThread extends Thread {
 
 	}
 
+	/**
+	 * Notifica cuando se ha completado el proceso de añadir una película
+	 */
 	public static void notifyComplete() {
 
 		String estado = null;
@@ -47,7 +55,7 @@ public class NotificationsThread extends Thread {
 
 		JSONObject jObject;
 		try {
-			jObject = new JSONObject(IPConnection.getInfo(Config.getIPADDRESS()));
+			jObject = new JSONObject(Library.getInfo(Config.getIPADDRESS()));
 			JSONArray torrents = jObject.getJSONArray("torrents");
 			for (int i = 0; i < torrents.length(); i++) {
 				JSONArray resultado = torrents.getJSONArray(i);
@@ -80,7 +88,7 @@ public class NotificationsThread extends Thread {
 							+ "/sendMessage?chat_id=395740029&text=" + mensaje);
 
 					// Delete download
-					IPConnection.removeFile(Config.getIPADDRESS(), hash);
+					Library.removeFile(Config.getIPADDRESS(), hash);
 
 					try {
 						client.execute(get);
@@ -94,6 +102,9 @@ public class NotificationsThread extends Thread {
 		}
 	}
 
+	/**
+	 * Notifica cada viernes a las 12 de la mañana las últimas recomendaciones de películas
+	 */
 	public static void notifyRecommendations() {
 
 		int dia = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
@@ -120,7 +131,7 @@ public class NotificationsThread extends Thread {
 				fechasRecomendaciones.add(diaActual);
 
 				// Recomendaciones semanales
-				for (Movie movie : AnalyzerService.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+year)) {
+				for (Movie movie : MoviesAPI.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+year)) {
 					recomendaciones = recomendaciones + "%20-%20" + movie.getName() + "%0A";
 				}
 				recomendaciones = recomendaciones.replace(" ", "%20");

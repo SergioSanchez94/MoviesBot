@@ -17,14 +17,20 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import com.sergiosanchez.configuration.Config;
-import com.sergiosanchez.movies.AnalyzerService;
-import com.sergiosanchez.movies.IPConnection;
+import com.sergiosanchez.connections.MoviesAPI;
+import com.sergiosanchez.connections.Downloader;
+import com.sergiosanchez.connections.Library;
 import com.sergiosanchez.movies.Movie;
 import com.vdurmont.emoji.EmojiParser;
 
+/**
+ * Se encarga de gestionar las distintas peticiones del chat así como de devolver los distintos
+ * tipos de respuesta usando el resto de clases del paquete connections
+ * @author Sergio Sanchez
+ *
+ */
 public class MoviesBot extends TelegramLongPollingBot {
 
-	// Hola soy el cambio del testing 1 para la branch
 	ArrayList<Movie> movies = new ArrayList<Movie>();
 	Movie movieSeleccionada;
 	ArrayList<String> listaOpciones = new ArrayList<String>();
@@ -51,7 +57,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 				
 				int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 				
-				for (Movie movie : AnalyzerService.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+currentYear)) {
+				for (Movie movie : MoviesAPI.getMovies("https://api.themoviedb.org/3/discover/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&primary_release_year="+currentYear)) {
 					mensaje = mensaje + " - " + movie.getName() + "\n";
 				}
 
@@ -80,7 +86,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 				}
 
 				try {
-					movies = AnalyzerService.searchMovie(search, Config.getDOMAIN());
+					movies = Downloader.searchMovie(search, Config.getDOMAIN());
 					ArrayList<KeyboardRow> rows = new ArrayList<KeyboardRow>();
 					int contador = 1;
 
@@ -128,7 +134,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().equals("Si, añádela")) {
 
 				try {
-					AnalyzerService.getMovie(Config.getIPADDRESS(), movieSeleccionada.getUrl(), Config.getDOMAIN());
+					Downloader.getMovie(Config.getIPADDRESS(), movieSeleccionada.getUrl(), Config.getDOMAIN());
 					message.setText(EmojiParser.parseToUnicode("La película " + movieSeleccionada.getName()
 							+ " se ha enviado a tu biblioteca :file_folder:"));
 
@@ -150,7 +156,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().equals("Ver Sinopsis")) {
 
 				ArrayList <Movie> movieSearch = new ArrayList<Movie>();
-				movieSearch = AnalyzerService.getMovies("https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="+busqueda+"&Spain&year="+movieSeleccionada.getDate()+"&page=1'");
+				movieSearch = MoviesAPI.getMovies("https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="+busqueda+"&Spain&year="+movieSeleccionada.getDate()+"&page=1'");
 				message.setText(" - Sinopsis: " + movieSearch.get(0).getDescription());
 				
 				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
@@ -197,7 +203,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 				JSONObject jObject;
 				try {
-					jObject = new JSONObject(IPConnection.getInfo(Config.getIPADDRESS()));
+					jObject = new JSONObject(Library.getInfo(Config.getIPADDRESS()));
 					JSONArray torrents = jObject.getJSONArray("torrents");
 					mensaje = "Aquí tienes el estado de tu biblioteca:\n\n";
 					
@@ -265,14 +271,14 @@ public class MoviesBot extends TelegramLongPollingBot {
 							numero = Integer.parseInt(numeroString.trim()) - 1;
 
 							try {
-								movieSeleccionada = AnalyzerService.getMovieInfo(movies.get(numero).getUrl(),
+								movieSeleccionada = Downloader.getMovieInfo(movies.get(numero).getUrl(),
 										Config.getDOMAIN());
 
 								movieSeleccionada.setName(movies.get(numero).getName());
 								movieSeleccionada.setQuality(movies.get(numero).getQuality());
 								movieSeleccionada.setUrl(movies.get(numero).getUrl());
 
-								String trailer = AnalyzerService.getTrailer(busqueda, movieSeleccionada.getDate());
+								String trailer = MoviesAPI.getTrailer(busqueda, movieSeleccionada.getDate());
 								
 								String mensaje = EmojiParser.parseToUnicode(
 										"Esta es la información de la película que has seleccionado:\n\n"

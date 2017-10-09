@@ -1,4 +1,4 @@
-package com.sergiosanchez.movies;
+package com.sergiosanchez.connections;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +22,24 @@ import org.apache.http.util.EntityUtils;
 
 import com.sergiosanchez.configuration.Config;
 
+/**
+ * Clase encargada de la gestión de la librería local
+ * @author Sergio Sanchez
+ *
+ */
 @SuppressWarnings("deprecation")
-public class IPConnection {
+public class Library {
 
     private static DefaultHttpClient httpclient;
 	private static DefaultHttpClient httpclient2;
 	private static DefaultHttpClient httpclient3;
 
+	/**
+	 * Se encarga de añadir una película a la librería
+	 * @param IP
+	 * @param source
+	 * @throws Exception
+	 */
 	public static void addFile(String IP,String source) throws Exception {
 
         HttpHost targetHost = new HttpHost(IP, Integer.parseInt(Config.getPORT()) , "http");
@@ -86,6 +97,11 @@ public class IPConnection {
         }
     }
     
+	/**
+	 * Recoge la información de las películas que tienen algún proceso abierto
+	 * @param IP
+	 * @return String
+	 */
     public static String getInfo(String IP) {
     	 HttpHost targetHost = new HttpHost(IP, Integer.parseInt(Config.getPORT()) , "http");
     	 
@@ -149,6 +165,12 @@ public class IPConnection {
 		return responseMethod;
     }
     
+    /**
+     * Borra una película de la librería
+     * @param IP
+     * @param hash
+     * @return String
+     */
     public static String removeFile(String IP, String hash) {
    	 HttpHost targetHost = new HttpHost(IP, Integer.parseInt(Config.getPORT()) , "http");
    	 

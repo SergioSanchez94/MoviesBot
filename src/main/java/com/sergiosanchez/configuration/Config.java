@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 
+/**
+ * Clase encargada de recuperar la información de configuración del fichero externo, almacenarla en sus variables para
+ * poder ser usadas por el resto de clases.
+ * @author Sergio Sanchez
+ *
+ */
 public class Config {
 
 	static String DOMAIN;
