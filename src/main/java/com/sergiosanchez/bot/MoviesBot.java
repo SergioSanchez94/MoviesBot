@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +61,10 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 			// Recoge el Id del chat
 			message.setChatId(update.getMessage().getChatId());
+			
+			//Formato de texto para poder poner negrita
+			message.enableMarkdown(true);
+			message.setParseMode("Markdown");
 
 			// Obtiene una lista de películas del año corriente (en pruebas)
 			if (update.getMessage().getText().startsWith("Recomiendame")) {
@@ -152,7 +155,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
 
 				// Coge la descripcion del primer resultado de la búsqueda
-				message.setText(" - Sinopsis: " + movieSeleccionada.getDescription());
+				message.setText("*Sinopsis*\n\n" + movieSeleccionada.getDescription());
 
 				// Genera un teclado de opciones
 				ArrayList<String> optionsKeyboard = new ArrayList<String>();
@@ -167,7 +170,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 			} else if (update.getMessage().getText().equals("Ver Casting")) {
 
 				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-				String mensaje = "Aqui tienes el casting de " + movieSeleccionada.getName() + ":\n\n";
+				String mensaje = "*Casting*:\n\n";
 				
 				ArrayList<Cast> castList = MoviesAPI.getCastList(movieSeleccionada.getId());
 				for (Cast cast : castList) {
@@ -236,7 +239,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 							porcentaje = porcentaje.replace(",", "");
 							porcentaje = porcentaje.replace("\"", "");
 
-							mensaje = mensaje + " - " + nombre + " está " + estadoTorrent + " con un "
+							mensaje = mensaje + " - *" + nombre + "* está " + estadoTorrent + " con un "
 									+ porcentaje.trim() + "\n\n";
 
 						}
@@ -297,6 +300,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 									movieSeleccionada.setName(moviesApi.get(0).getName());
 									movieSeleccionada.setVoteAverage(moviesApi.get(0).getVoteAverage());
 									movieSeleccionada.setImg(moviesApi.get(0).getImg());
+									movieSeleccionada.setDate(moviesApi.get(0).getDate());
 									
 									//Buscamos el trailer
 									String trailer = MoviesAPI.getTrailer(movieSeleccionada.getId());
@@ -311,14 +315,14 @@ public class MoviesBot extends TelegramLongPollingBot {
 								//Si ha encontrado datos en la API
 								if(APIconnection){
 									mensaje = 
-											":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
-											+ " - Calificación: " + movieSeleccionada.getVoteAverage() + " :thumbsup:\n"
-											+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
-											+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
-											+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n";
+											":movie_camera: *" + movieSeleccionada.getName() + "* :popcorn:\n\n"
+											+ " - *Calificación*: " + movieSeleccionada.getVoteAverage() + " :thumbsup:\n"
+											+ " - *Fecha*: " + movieSeleccionada.getDate() + " :date:\n"
+											+ " - *Calidad*: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
+											+ " - *Tamaño*: " + movieSeleccionada.getSize() + " :dvd:\n";
 											
 											if(movieSeleccionada.getTrailer()!="" && movieSeleccionada.getTrailer()!=null){
-												mensaje = mensaje + " - Trailer: " + movieSeleccionada.getTrailer();
+												mensaje = mensaje + " - *Trailer*: " + movieSeleccionada.getTrailer();
 											}
 
 											ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
@@ -336,10 +340,10 @@ public class MoviesBot extends TelegramLongPollingBot {
 								//Si NO ha encontrado datos en la API
 								}else{
 									mensaje = 
-											":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
-											+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
-											+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
-											+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n";
+											":movie_camera: *" + movieSeleccionada.getName() + "* :popcorn:\n\n"
+											+ " - *Fecha*: " + movieSeleccionada.getDate() + " :date:\n"
+											+ " - *Calidad*: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
+											+ " - *Tamaño*: " + movieSeleccionada.getSize() + " :dvd:\n";
 									
 									ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
 									
@@ -364,7 +368,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 								}
 								
 								message.setText(EmojiParser.parseToUnicode(mensaje));
-
+								
 							} catch (MalformedURLException e) {
 								e.printStackTrace();
 							}
