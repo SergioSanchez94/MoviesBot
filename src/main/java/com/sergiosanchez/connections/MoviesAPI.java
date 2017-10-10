@@ -81,6 +81,7 @@ public class MoviesAPI {
 						movie.setId(resultado.getInt("id"));
 						movie.setDescription(resultado.getString("overview"));
 						movie.setVoteAverage(resultado.getInt("vote_average"));
+						movie.setImg("https://image.tmdb.org/t/p/w500/" + resultado.getString("poster_path"));
 						movies.add(movie);
 					}
 

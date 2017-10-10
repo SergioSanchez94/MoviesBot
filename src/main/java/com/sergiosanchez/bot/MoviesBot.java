@@ -296,6 +296,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 									movieSeleccionada.setId(moviesApi.get(0).getId());
 									movieSeleccionada.setName(moviesApi.get(0).getName());
 									movieSeleccionada.setVoteAverage(moviesApi.get(0).getVoteAverage());
+									movieSeleccionada.setImg(moviesApi.get(0).getImg());
 									
 									//Buscamos el trailer
 									String trailer = MoviesAPI.getTrailer(movieSeleccionada.getId());
@@ -319,7 +320,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 											if(movieSeleccionada.getTrailer()!="" && movieSeleccionada.getTrailer()!=null){
 												mensaje = mensaje + " - Trailer: " + movieSeleccionada.getTrailer();
 											}
-											
+
 											ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
 											
 											// Genera un teclado de opciones
@@ -330,7 +331,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 											optionsKeyboard.add("Enseñame la lista otra vez");
 											optionsKeyboard.add("Cancelar");
 											keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
-											message.setReplyMarkup(keyboard);
+											message.setReplyMarkup(keyboard);					
 
 								//Si NO ha encontrado datos en la API
 								}else{
@@ -351,8 +352,8 @@ public class MoviesBot extends TelegramLongPollingBot {
 									message.setReplyMarkup(keyboard);
 								}
 								
-								message.setText(EmojiParser.parseToUnicode(mensaje));
-
+								System.out.println("IMAGEN: " + movieSeleccionada.getImg());
+								
 								try {
 									SendPhoto sendPhoto = new SendPhoto();
 									sendPhoto.setChatId(update.getMessage().getChatId());
@@ -361,6 +362,8 @@ public class MoviesBot extends TelegramLongPollingBot {
 								} catch (TelegramApiException e) {
 									e.printStackTrace();
 								}
+								
+								message.setText(EmojiParser.parseToUnicode(mensaje));
 
 							} catch (MalformedURLException e) {
 								e.printStackTrace();
