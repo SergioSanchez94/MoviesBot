@@ -125,7 +125,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 				}
 
 				//Añade la pelicula a la libreria
-			} else if (update.getMessage().getText().equals("Si, añádela")) {
+			} else if (update.getMessage().getText().equals("Añadir a mi biblioteca")) {
 				
 				String mensaje;
 
@@ -147,13 +147,6 @@ public class MoviesBot extends TelegramLongPollingBot {
 				// Elimina la información de las variables
 				Util.deleteData();
 
-			} else if (update.getMessage().getText().equals("No, esa no")) {
-
-				message.setText("OK, no añadiré " + movieSeleccionada.getName());
-
-				// Elimina la información de las variables
-				Util.deleteData();
-
 			} else if (update.getMessage().getText().equals("Ver Sinopsis")) {
 
 				ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
@@ -163,11 +156,11 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 				// Genera un teclado de opciones
 				ArrayList<String> optionsKeyboard = new ArrayList<String>();
-				optionsKeyboard.add("Si, añádela");
-				optionsKeyboard.add("No, esa no");
+				optionsKeyboard.add("Añadir a mi biblioteca");
 				optionsKeyboard.add("Ver Sinopsis");
 				optionsKeyboard.add("Ver Casting");
 				optionsKeyboard.add("Enseñame la lista otra vez");
+				optionsKeyboard.add("Cancelar");
 				keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
 				message.setReplyMarkup(keyboard);
 
@@ -186,11 +179,11 @@ public class MoviesBot extends TelegramLongPollingBot {
 
 				// Genera un teclado de opciones
 				ArrayList<String> optionsKeyboard = new ArrayList<String>();
-				optionsKeyboard.add("Si, añádela");
-				optionsKeyboard.add("No, esa no");
+				optionsKeyboard.add("Añadir a mi biblioteca");
 				optionsKeyboard.add("Ver Sinopsis");
 				optionsKeyboard.add("Ver Casting");
 				optionsKeyboard.add("Enseñame la lista otra vez");
+				optionsKeyboard.add("Cancelar");
 				keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
 				message.setReplyMarkup(keyboard);	
 			
@@ -281,31 +274,84 @@ public class MoviesBot extends TelegramLongPollingBot {
 								movieSeleccionada.setName(movies.get(numero).getName());
 								movieSeleccionada.setQuality(movies.get(numero).getQuality());
 								movieSeleccionada.setUrl(movies.get(numero).getUrl());
-
-								String trailer = MoviesAPI.getTrailer(busqueda, movieSeleccionada.getDate());
-
-								String mensaje = EmojiParser.parseToUnicode(
-										"Esta es la información de la película que has seleccionado:\n\n"
-												+ ":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
-												+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
-												+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
-												+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n"
-												+ " - Trailer: " + trailer + "\n\n"
-												+ "¿Quieres añadirla a tu biblioteca? (Aquí te dejo un trailer por si no te decides :wink:)\n\n");
-
-								message.setText(mensaje);
 								
-								// Pasa la busqueda a formato URL
-								String busquedaURL = busqueda.replace(" ", "%20");
-
-								// Hace la busqueda
-								ArrayList<Movie> movieSearchAPI = new ArrayList<Movie>();
-								movieSearchAPI = MoviesAPI.getMovies(
-										"https://api.themoviedb.org/3/search/movie?api_key=274474733b6e36dfdf3406071a9a4ae6&language=es-ES&query="
-												+ busquedaURL + "&Spain&year=" + movieSeleccionada.getDate() + "&page=1'");
+								//Pasa la busqueda a formato URL
+								String busquedaURL = movieSeleccionada.getName();
 								
-								movieSeleccionada.setDescription(movieSearchAPI.get(0).getDescription());
-								movieSeleccionada.setId(movieSearchAPI.get(0).getId());
+								if(busquedaURL.contains("Version")){
+									busquedaURL = busquedaURL.substring(0,busquedaURL.indexOf("Version"));
+								}
+
+								busquedaURL = busquedaURL.replace(" ", "%20");
+								
+								//Variable que controla la conexión de datos con la API
+								boolean APIconnection = true;
+								
+								try{
+									//Hace busqueda de información en la API
+									System.out.println("URL API: https://api.themoviedb.org/3/search/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&query="+ busquedaURL +"&page=1&include_adult=false&region=Spain&year=" + movieSeleccionada.getDate());
+									ArrayList<Movie> moviesApi = MoviesAPI.getMovies("https://api.themoviedb.org/3/search/movie?api_key="+Config.getAPIKEY()+"&language=es-ES&query="+ busquedaURL +"&page=1&include_adult=false&region=Spain&year=" + movieSeleccionada.getDate());
+									
+									movieSeleccionada.setDescription(moviesApi.get(0).getDescription());
+									movieSeleccionada.setId(moviesApi.get(0).getId());
+									movieSeleccionada.setName(moviesApi.get(0).getName());
+									movieSeleccionada.setVoteAverage(moviesApi.get(0).getVoteAverage());
+									
+									//Buscamos el trailer
+									String trailer = MoviesAPI.getTrailer(movieSeleccionada.getId());
+									movieSeleccionada.setTrailer(trailer);
+								}catch(Exception e){
+									System.err.println("No se ha podido obtener la información de la API");
+									APIconnection = false;
+								}
+								
+								String mensaje;
+								
+								//Si ha encontrado datos en la API
+								if(APIconnection){
+									mensaje = 
+											":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
+											+ " - Calificación: " + movieSeleccionada.getVoteAverage() + " :thumbsup:\n"
+											+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
+											+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
+											+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n";
+											
+											if(movieSeleccionada.getTrailer()!="" && movieSeleccionada.getTrailer()!=null){
+												mensaje = mensaje + " - Trailer: " + movieSeleccionada.getTrailer();
+											}
+											
+											ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+											
+											// Genera un teclado de opciones
+											ArrayList<String> optionsKeyboard = new ArrayList<String>();
+											optionsKeyboard.add("Añadir a mi biblioteca");
+											optionsKeyboard.add("Ver Sinopsis");
+											optionsKeyboard.add("Ver Casting");
+											optionsKeyboard.add("Enseñame la lista otra vez");
+											optionsKeyboard.add("Cancelar");
+											keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
+											message.setReplyMarkup(keyboard);
+
+								//Si NO ha encontrado datos en la API
+								}else{
+									mensaje = 
+											":movie_camera: " + movieSeleccionada.getName() + " :popcorn:\n"
+											+ " - Fecha: " + movieSeleccionada.getDate() + " :date:\n"
+											+ " - Calidad: " + movieSeleccionada.getQuality() + " :thumbsup:\n"
+											+ " - Tamaño: " + movieSeleccionada.getSize() + " :dvd:\n";
+									
+									ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+									
+									// Genera un teclado de opciones
+									ArrayList<String> optionsKeyboard = new ArrayList<String>();
+									optionsKeyboard.add("Añadir a mi biblioteca");
+									optionsKeyboard.add("Enseñame la lista otra vez");
+									optionsKeyboard.add("Cancelar");
+									keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
+									message.setReplyMarkup(keyboard);
+								}
+								
+								message.setText(EmojiParser.parseToUnicode(mensaje));
 
 								try {
 									SendPhoto sendPhoto = new SendPhoto();
@@ -315,18 +361,6 @@ public class MoviesBot extends TelegramLongPollingBot {
 								} catch (TelegramApiException e) {
 									e.printStackTrace();
 								}
-
-								ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-								
-								// Genera un teclado de opciones
-								ArrayList<String> optionsKeyboard = new ArrayList<String>();
-								optionsKeyboard.add("Si, añádela");
-								optionsKeyboard.add("No, esa no");
-								optionsKeyboard.add("Ver Sinopsis");
-								optionsKeyboard.add("Ver Casting");
-								optionsKeyboard.add("Enseñame la lista otra vez");
-								keyboard.setKeyboard(Util.generateKeyboard(optionsKeyboard, false));
-								message.setReplyMarkup(keyboard);
 
 							} catch (MalformedURLException e) {
 								e.printStackTrace();

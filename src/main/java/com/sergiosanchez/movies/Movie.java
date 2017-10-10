@@ -15,13 +15,15 @@ public class Movie {
 	String url;
 	String img;
 	String size;
+	String trailer;
+	int voteAverage;
 	
 	/**
 	 * @param name
 	 * @param url
 	 * @param img 
 	 */
-	public Movie(int id, String name, String date, String description, String quality, String url, String img, String size) {
+	public Movie(int id, String name, String date, String description, String quality, String url, String img, String size, String trailer, int voteAverage) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -31,8 +33,11 @@ public class Movie {
 		this.img = img;
 		this.quality = quality;
 		this.size = size;
+		this.trailer = trailer;
+		this.voteAverage = voteAverage;
 	}
-
+	
+	public Movie(){}
 	
 	/**
 	 * @return the id
@@ -147,6 +152,34 @@ public class Movie {
 	 */
 	public void setSize(String size) {
 		this.size = size;
+	}
+
+	/**
+	 * @return the trailer
+	 */
+	public String getTrailer() {
+		return trailer;
+	}
+
+	/**
+	 * @param trailer the trailer to set
+	 */
+	public void setTrailer(String trailer) {
+		this.trailer = trailer;
+	}
+
+	/**
+	 * @return the voteAverage
+	 */
+	public int getVoteAverage() {
+		return voteAverage;
+	}
+
+	/**
+	 * @param i the voteAverage to set
+	 */
+	public void setVoteAverage(int i) {
+		this.voteAverage = i;
 	}
 	
 }

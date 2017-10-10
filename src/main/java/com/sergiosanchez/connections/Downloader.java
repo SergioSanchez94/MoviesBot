@@ -81,21 +81,40 @@ public class Downloader {
 					String nombre = enlace.get(0).toString();
 
 					String url = nombre.substring(nombre.indexOf("<a href=") + 10, nombre.indexOf(".html"));
+				
+					String nombreTemp = nombre;
+					String nombreFinal = "";
+					
+					while(nombreTemp.contains("<")||nombreTemp.contains(">")){
+						nombreFinal = "";
+						int ini = nombreTemp.indexOf("<");
+						int fin = nombreTemp.indexOf(">");
 
-					nombre = nombre.substring(nombre.indexOf("<font color=") + 23, nombre.length());
-					nombre = nombre.replace("</font>", "");
-					nombre = nombre.replace("</a>", "");
-					nombre = nombre.replace("(", "");
-					nombre = nombre.replace(")", "");
+						for (int j = 0; j < nombreTemp.length(); j++) {
+							if(j < ini || j > fin){
+								nombreFinal = nombreFinal + nombreTemp.charAt(j);
+							}	
+						}
+						nombreTemp = nombreFinal;
+					}
+					
+//					nombre = nombre.substring(nombre.indexOf("<font color=") + 23, nombre.length());
+//					nombre = nombre.replace("</font>", "");
+//					nombre = nombre.replace("</a>", "");
+//					nombre = nombre.replace("(", "");
+//					nombre = nombre.replace(")", "");
 
 					// Quita los parentesis de la calidad
 					calidad = calidad.substring(1, calidad.length() - 1);
 
-					if (nombre.substring(nombre.length() - 1, nombre.length()).equals(".")) {
-						nombre = nombre.substring(0, nombre.length() - 1);
+					if (nombreFinal.substring(nombreFinal.length() - 1, nombreFinal.length()).equals(".")) {
+						nombreFinal = nombreFinal.substring(0, nombreFinal.length() - 1);
 					}
 
-					Movie movie = new Movie(0, nombre, null, null, calidad, url, null, null);
+					Movie movie = new Movie();
+					movie.setName(nombreFinal);
+					movie.setQuality(calidad);
+					movie.setUrl(url);
 
 					// Solo añade estas dos calidades
 					if (calidad.equals("MicroHD-1080p") || calidad.equals("DVDRip")) {
@@ -185,7 +204,12 @@ public class Downloader {
 			ex.printStackTrace();
 		}
 
-		Movie movie = new Movie(0, null, date, description, null, url, imagenPelicula, GB);
+		Movie movie = new Movie();
+		movie.setDate(date);
+		movie.setDescription(description);
+		movie.setUrl(url);
+		movie.setImg(imagenPelicula);
+		movie.setSize(GB);
 
 		return movie;
 
