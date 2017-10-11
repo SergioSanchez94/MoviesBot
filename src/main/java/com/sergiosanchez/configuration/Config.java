@@ -23,6 +23,7 @@ public class Config {
 	static String USER;
 	static String PASSWORD;
 	static String BOTNAME;
+	static String USERSLIST[];
 
 	public static void initConfig() {
 		try {
@@ -69,6 +70,8 @@ public class Config {
 				case "botName":
 					BOTNAME = value;
 					break;
+				case "usersList":
+					USERSLIST = value.split(";");
 				default:
 					break;
 				}
@@ -178,13 +181,32 @@ public class Config {
 		PASSWORD = pASSWORD;
 	}
 
+	/**
+	 * @return the bOTNAME
+	 */
 	public static String getBOTNAME() {
 		return BOTNAME;
 	}
 
+	/**
+	 * @param bOTNAME the bOTNAME to set
+	 */
 	public static void setBOTNAME(String bOTNAME) {
 		BOTNAME = bOTNAME;
 	}
-	
+
+	/**
+	 * @return the uSERSLIST
+	 */
+	public static String[] getUSERSLIST() {
+		return USERSLIST;
+	}
+
+	/**
+	 * @param uSERSLIST the uSERSLIST to set
+	 */
+	public static void setUSERSLIST(String[] uSERSLIST) {
+		USERSLIST = uSERSLIST;
+	}	
 
 }
