@@ -76,7 +76,6 @@ public class Library {
             int start = "<html><div id='token' style='display:none;'>".length();
             int end = t.indexOf("</div></html>");
             String token = t.substring(start,end);
-            System.out.println(token);
             EntityUtils.consumeQuietly(response.getEntity());
             
              String add = URLEncoder.encode(source,"UTF-8");
@@ -90,9 +89,10 @@ public class Library {
             sw.flush();
             sw.close();
             is.close();
-            System.out.println(sw.toString());
 
-        } finally {
+        }catch(Exception e){
+        	System.err.println("No se ha podido añadir al archivo a la Biblioteca (posible fallo de conexión)");
+        }finally {
             httpclient.getConnectionManager().shutdown();
         }
     }
@@ -139,7 +139,6 @@ public class Library {
              int start = "<html><div id='token' style='display:none;'>".length();
              int end = t.indexOf("</div></html>");
              String token = t.substring(start,end);
-             System.out.println(token);
              EntityUtils.consumeQuietly(response.getEntity());
              
              httpget = new HttpGet("http://"+IP+":"+8080+"/gui/?list=1&token="+token);
@@ -153,12 +152,11 @@ public class Library {
              sw.close();
              is.close();
              responseMethod = sw.toString();
-             System.out.println(sw.toString());
 
          } catch (ClientProtocolException e1) {
-			e1.printStackTrace();
+        	 System.err.println("No se ha podido obtener la información de la Biblioteca (posible fallo de conexión)");
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			System.err.println("No se ha podido obtener la información de la Biblioteca (posible fallo de conexión)");
 		} finally {
              httpclient2.getConnectionManager().shutdown();
          }
@@ -208,7 +206,6 @@ public class Library {
             int start = "<html><div id='token' style='display:none;'>".length();
             int end = t.indexOf("</div></html>");
             String token = t.substring(start,end);
-            System.out.println(token);
             EntityUtils.consumeQuietly(response.getEntity());
             
             httpget = new HttpGet("http://"+IP+":"+8080+"/gui/?action=remove&hash="+hash+"&token="+token);
@@ -222,12 +219,11 @@ public class Library {
             sw.close();
             is.close();
             responseMethod = sw.toString();
-            System.out.println(sw.toString());
 
         } catch (ClientProtocolException e1) {
-			e1.printStackTrace();
+        	System.err.println("No se ha podido eliminar de la Biblioteca (posible fallo de conexión)");
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			System.err.println("No se ha podido eliminar de la Biblioteca (posible fallo de conexión)");
 		} finally {
             httpclient3.getConnectionManager().shutdown();
         }

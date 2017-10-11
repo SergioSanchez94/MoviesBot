@@ -1,5 +1,7 @@
 package com.sergiosanchez.movies;
 
+import java.util.ArrayList;
+
 /**
  * Clase objeto que almacena la información de una película
  * @author Sergio Sanchez
@@ -17,13 +19,14 @@ public class Movie {
 	String size;
 	String trailer;
 	int voteAverage;
+	ArrayList<Cast> casting;
 	
 	/**
 	 * @param name
 	 * @param url
 	 * @param img 
 	 */
-	public Movie(int id, String name, String date, String description, String quality, String url, String img, String size, String trailer, int voteAverage) {
+	public Movie(int id, String name, String date, String description, String quality, String url, String img, String size, String trailer, int voteAverage, ArrayList<Cast> casting) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -35,6 +38,7 @@ public class Movie {
 		this.size = size;
 		this.trailer = trailer;
 		this.voteAverage = voteAverage;
+		this.casting = casting;
 	}
 	
 	public Movie(){}
@@ -180,6 +184,20 @@ public class Movie {
 	 */
 	public void setVoteAverage(int i) {
 		this.voteAverage = i;
+	}
+
+	/**
+	 * @return the casting
+	 */
+	public ArrayList<Cast> getCasting() {
+		return casting;
+	}
+
+	/**
+	 * @param casting the casting to set
+	 */
+	public void setCasting(ArrayList<Cast> casting) {
+		this.casting = casting;
 	}
 	
 }

@@ -87,7 +87,7 @@ public class NotificationsThread extends Thread {
 					HttpGet get = new HttpGet("https://api.telegram.org/bot" + Config.getBOTAPIKEY()
 							+ "/sendMessage?chat_id=395740029&text=" + mensaje);
 
-					// Delete download
+					//Borra el archivo de la librería
 					Library.removeFile(Config.getIPADDRESS(), hash);
 
 					try {
@@ -99,6 +99,7 @@ public class NotificationsThread extends Thread {
 			}
 
 		} catch (JSONException e) {
+			System.err.println("No se ha podido vigilar los archivos por parte del hilo para enviar notificaciones");
 		}
 	}
 

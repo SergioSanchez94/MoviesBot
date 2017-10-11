@@ -195,8 +195,7 @@ public class MoviesBot extends TelegramLongPollingBot {
 						ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
 						String mensaje = "*Casting*:\n\n";
 
-						ArrayList<Cast> castList = MoviesAPI.getCastList(movieSeleccionada.getId());
-						for (Cast cast : castList) {
+						for (Cast cast : movieSeleccionada.getCasting()) {
 							mensaje = mensaje + " - " + cast.getActor() + " como " + cast.getCharacter() + "\n";
 						}
 
@@ -338,7 +337,8 @@ public class MoviesBot extends TelegramLongPollingBot {
 											movieSeleccionada.setName(moviesApi.get(0).getName());
 											movieSeleccionada.setVoteAverage(moviesApi.get(0).getVoteAverage());
 											movieSeleccionada.setImg(moviesApi.get(0).getImg());
-											movieSeleccionada.setDate(moviesApi.get(0).getDate());
+											movieSeleccionada.setDate(moviesApi.get(0).getDate());		
+											movieSeleccionada.setCasting(MoviesAPI.getCastList(movieSeleccionada.getId()));
 
 											// Buscamos el trailer
 											String trailer = MoviesAPI.getTrailer(movieSeleccionada.getId());
