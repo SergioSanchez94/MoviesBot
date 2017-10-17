@@ -199,7 +199,7 @@ public class MoviesAPI {
 						cast.setId(resultado.getInt("cast_id"));
 						cast.setCharacter(resultado.getString("character"));
 						cast.setActor(resultado.getString("name"));
-						cast.setImg("profile_path");
+						cast.setImg(resultado.getString("profile_path"));
 						castList.add(cast);
 					}
 
